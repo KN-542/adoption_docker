@@ -17,7 +17,7 @@ services:
 
   backend:
     build:
-      context: ../adoption_backend
+      context: ../adoption_go
       dockerfile: Dockerfile
     container_name: backend
     depends_on:
@@ -25,7 +25,7 @@ services:
     working_dir: /app
     hostname: backend
     volumes:
-      - ../adoption_backend:/app:cached
+      - ../adoption_go:/app:cached
     tty: true
     ports:
       - "8080:8080"
