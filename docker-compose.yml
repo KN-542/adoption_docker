@@ -1,0 +1,81 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: ../adoption_nextjs
+      dockerfile: Dockerfile
+    container_name: frontend
+    working_dir: /app
+    hostname: frontend
+    volumes:
+      - ../adoption_nextjs:/app:cached
+    tty: true
+    ports:
+      - "3000:3000"
+    networks:
+      - network1
+
+  backend:
+    build:
+      context: ../adoption_backend
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      - postgres # バックエンドのコンテナがpostgresに依存
+    working_dir: /app
+    hostname: backend
+    volumes:
+      - ../adoption_backend:/app:cached
+    tty: true
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: postgres
+      GO_ENV: dev
+      API_DOMAIN: backend
+      FE_URL: http://frontend:3000
+      FE_CORS_URL: http://localhost:3000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - network1
+
+  postgres:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    networks:
+      - network1
+
+  redis:
+    image: redis:7.2.1-alpine
+    container_name: redis
+    hostname: redis
+    ports:
+      - 6380:6379
+    networks:
+      - network1
+
+  redisinsight:
+    image: redislabs/redisinsight
+    container_name: redisinsight
+    ports:
+      - 8001:8001
+
+networks:
+  network1:
+    driver: bridge
