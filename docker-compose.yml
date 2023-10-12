@@ -12,6 +12,9 @@ services:
     tty: true
     ports:
       - "3000:3000"
+    environment:
+      NEXT_CSR_URL: http://localhost:8080
+      NEXT_SSR_URL: http://backend:8080
     networks:
       - network1
 
@@ -37,8 +40,8 @@ services:
       POSTGRES_HOST: postgres
       GO_ENV: dev
       API_DOMAIN: backend
-      FE_URL: http://frontend:3000
-      FE_CORS_URL: http://localhost:3000
+      FE_CSR_URL: http://localhost:3000
+      FE_SSR_URL: http://frontend:3000
       REDIS_HOST: redis
       REDIS_PORT: 6379
     networks:
