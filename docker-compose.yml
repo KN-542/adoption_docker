@@ -9,9 +9,13 @@ services:
     hostname: frontend
     volumes:
       - ../adoption_nextjs:/app:cached
+      - next_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
     tty: true
     ports:
       - "3000:3000"
+    environment:
+      NEXT_CSR_URL: http://localhost:8080
+      NEXT_SSR_URL: http://backend:8080
     networks:
       - network1
 
@@ -26,6 +30,7 @@ services:
     hostname: backend
     volumes:
       - ../adoption_go:/app:cached
+      # ここにGoの依存関係のディレクトリがあれば、同様にキャッシュを考慮して追加
     tty: true
     ports:
       - "8080:8080"
@@ -37,8 +42,8 @@ services:
       POSTGRES_HOST: postgres
       GO_ENV: dev
       API_DOMAIN: backend
-      FE_URL: http://frontend:3000
-      FE_CORS_URL: http://localhost:3000
+      FE_CSR_URL: http://localhost:3000
+      FE_SSR_URL: http://frontend:3000
       REDIS_HOST: redis
       REDIS_PORT: 6379
     networks:
