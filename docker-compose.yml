@@ -9,6 +9,7 @@ services:
     hostname: frontend
     volumes:
       - ../adoption_nextjs:/app:cached
+      - next_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
     tty: true
     ports:
       - "3000:3000"
@@ -29,6 +30,7 @@ services:
     hostname: backend
     volumes:
       - ../adoption_go:/app:cached
+      # ここにGoの依存関係のディレクトリがあれば、同様にキャッシュを考慮して追加
     tty: true
     ports:
       - "8080:8080"
