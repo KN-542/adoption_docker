@@ -84,3 +84,6 @@ services:
 networks:
   network1:
     driver: bridge
+
+volumes:
+  next_node_modules:
