@@ -34,7 +34,7 @@ services:
     tty: true
     ports:
       - "8080:8080"
-    environment:
+    environment: # AWS Secrets Managerに格納すること！
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
@@ -42,6 +42,7 @@ services:
       POSTGRES_HOST: postgres
       GO_ENV: dev
       API_DOMAIN: backend
+      JWT_SECRET: L67HRe77jlmoAoaV
       FE_CSR_URL: http://localhost:3000
       FE_SSR_URL: http://frontend:3000
       REDIS_HOST: redis
