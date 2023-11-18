@@ -14,8 +14,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_CSR_URL: http://localhost:8080
-      NEXT_SSR_URL: http://backend:8080
+      NEXT_PUBLIC_CSR_URL: http://localhost:8080
+      NEXT_SSG_URL: http://backend:8080
     networks:
       - network1
 
@@ -43,8 +43,9 @@ services:
       GO_ENV: dev
       API_DOMAIN: backend
       JWT_SECRET: L67HRe77jlmoAoaV
+      JWT_SECRET2: MHqYeuZwM9n5Tn09
       FE_CSR_URL: http://localhost:3000
-      FE_SSR_URL: http://frontend:3000
+      FE_SSG_URL: http://frontend:3000
       REDIS_HOST: redis
       REDIS_PORT: 6379
     networks:
