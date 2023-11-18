@@ -81,6 +81,8 @@ services:
     container_name: redisinsight
     ports:
       - 8001:8001
+    networks:
+      - network1
 
 networks:
   network1:
