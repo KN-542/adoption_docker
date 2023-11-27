@@ -19,6 +19,25 @@ services:
     networks:
       - network1
 
+  frontend_applicant:
+    build:
+      context: ../applicant_nextjs
+      dockerfile: Dockerfile
+    container_name: frontend_applicant
+    working_dir: /app
+    hostname: frontend_applicant
+    volumes:
+      - ../applicant_nextjs:/app:cached
+      - next2_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
+    tty: true
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_CSR_URL: http://localhost:8080
+      NEXT_SSG_URL: http://backend:8080
+    networks:
+      - network1
+
   backend:
     build:
       context: ../adoption_go
@@ -42,10 +61,13 @@ services:
       POSTGRES_HOST: postgres
       GO_ENV: dev
       API_DOMAIN: backend
-      JWT_SECRET: L67HRe77jlmoAoaV
-      JWT_SECRET2: MHqYeuZwM9n5Tn09
+      JWT_SECRET: L67HRe77jlmoAoaV1
+      JWT_SECRET2: L67HRe77jlmoAoaV2
+      JWT_SECRET3: L67HRe77jlmoAoaV3
       FE_CSR_URL: http://localhost:3000
       FE_SSG_URL: http://frontend:3000
+      FE_APPLICANT_CSR_URL: http://localhost:3001
+      FE_APPLICANT_SSG_URL: http://frontend_applicant:3000
       REDIS_HOST: redis
       REDIS_PORT: 6379
     networks:
@@ -91,3 +113,4 @@ networks:
 
 volumes:
   next_node_modules:
+  next2_node_modules:
