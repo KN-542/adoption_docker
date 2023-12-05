@@ -8,18 +8,13 @@ docker-compose up -d
 
 を powershell 等で実行
 
-### frontend 起動方法
-
-frontend コンテナのログを確認(Docker Desktop で log を見るか、または
+### バックエンドコンテナアクセス方法
 
 ```
-docker container logs -f --tail=100 frontend
-```
-
-)で、無事にビルドが通れば
+docker container logs -f --tail=100 backend
 
 ```
-http://localhost:5173/
-```
 
-にアクセス
+### フロントエンドコンテナアクセス方法
+
+vscode 上でコンテナにアタッチ
