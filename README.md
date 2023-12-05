@@ -11,7 +11,7 @@ docker-compose up -d
 ### バックエンドコンテナアクセス方法
 
 ```
-docker container logs -f --tail=100 backend
+docker exec -it backend /bin/sh
 
 ```
 
