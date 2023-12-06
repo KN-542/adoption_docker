@@ -70,6 +70,10 @@ services:
       FE_APPLICANT_SSG_URL: http://frontend_applicant:3000
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      AWS_REGION: ap-northeast-1
+      AWS_ACCESS_KEY: <REDACTED>
+      AWS_SECRET_KEY: <REDACTED>/
+      AWS_S3_BUCKET_NAME: adoption-resume
     networks:
       - network1
 
