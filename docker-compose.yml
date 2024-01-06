@@ -64,6 +64,7 @@ services:
       JWT_SECRET: L67HRe77jlmoAoaV1
       JWT_SECRET2: L67HRe77jlmoAoaV2
       JWT_SECRET3: L67HRe77jlmoAoaV3
+      BATCH_URL: http://batch:8081
       FE_CSR_URL: http://localhost:3000
       FE_SSG_URL: http://frontend:3000
       FE_APPLICANT_CSR_URL: http://localhost:3001
@@ -74,6 +75,25 @@ services:
       AWS_ACCESS_KEY: <REDACTED>
       AWS_SECRET_KEY: <REDACTED>/
       AWS_S3_BUCKET_NAME: adoption-resume
+    networks:
+      - network1
+
+  batch:
+    build:
+      context: ../adoption_batch
+      dockerfile: Dockerfile
+    container_name: batch
+    working_dir: /app
+    hostname: batch
+    volumes:
+      - ../adoption_batch:/app:cached
+    tty: true
+    ports:
+      - "8081:8081"
+    environment:
+      GO_ENV: dev
+      BATCH_DOMAIN: batch
+      API_URL: http://backend:8080
     networks:
       - network1
 
