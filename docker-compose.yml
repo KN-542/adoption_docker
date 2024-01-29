@@ -75,6 +75,10 @@ services:
       AWS_ACCESS_KEY: <REDACTED>
       AWS_SECRET_KEY: <REDACTED>/
       AWS_S3_BUCKET_NAME: adoption-resume
+      AUTH_CLIENT_ID: <REDACTED>
+      AUTH_CLIENT_SECRET: <REDACTED>
+      AUTH_REDIRECT_URI: http://localhost:3000/management/admin/applicant
+      AUTH_SCOPE_URI: https://www.googleapis.com/auth/calendar
     networks:
       - network1
 
