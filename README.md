@@ -17,4 +17,4 @@ docker exec -it backend /bin/sh
 
 ### フロントエンドコンテナアクセス方法
 
-vscode 上でコンテナにアタッチ
+vscode 上 でコンテナにアタッチ
