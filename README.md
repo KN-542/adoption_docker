@@ -11,7 +11,7 @@ docker-compose up -d
 ### バックエンドコンテナアクセス方法
 
 ```
-docker exec -it backend /bin/sh
+docker exec -it backend /bin/bash
 
 ```
 

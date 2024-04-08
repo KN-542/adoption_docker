@@ -4,18 +4,18 @@ services:
     build:
       context: ../adoption_nextjs
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: ${FRONT_CONTAINER_NAME}
     working_dir: /app
-    hostname: frontend
+    hostname: ${FRONT_CONTAINER_NAME}
     volumes:
       - ../adoption_nextjs:/app:cached
       - next_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
     tty: true
     ports:
-      - "3000:3000"
+      - "${FRONT_HOST_PORT}:${FRONT_CONTEINER_PORT}"
     environment:
-      NEXT_PUBLIC_CSR_URL: http://localhost:8080
-      NEXT_SSG_URL: http://backend:8080
+      NEXT_PUBLIC_CSR_URL: ${PROTOCOL}://${HOST}:${BACKEND_HOST_PORT}
+      NEXT_SSG_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
     networks:
       - network1
 
@@ -23,18 +23,18 @@ services:
     build:
       context: ../applicant_nextjs
       dockerfile: Dockerfile
-    container_name: frontend_applicant
+    container_name: ${FRONT2_CONTAINER_NAME}
     working_dir: /app
-    hostname: frontend_applicant
+    hostname: ${FRONT2_CONTAINER_NAME}
     volumes:
       - ../applicant_nextjs:/app:cached
       - next2_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
     tty: true
     ports:
-      - "3001:3000"
+      - "${FRONT2_HOST_PORT}:${FRONT2_CONTEINER_PORT}"
     environment:
-      NEXT_PUBLIC_CSR_URL: http://localhost:8080
-      NEXT_SSG_URL: http://backend:8080
+      NEXT_PUBLIC_CSR_URL: ${PROTOCOL}://${HOST}:${BACKEND_HOST_PORT}
+      NEXT_SSG_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
     networks:
       - network1
 
@@ -42,62 +42,41 @@ services:
     build:
       context: ../adoption_go
       dockerfile: Dockerfile
-    container_name: backend
+    container_name: ${BACKEND_CONTAINER_NAME}
     depends_on:
       - postgres # バックエンドのコンテナがpostgresに依存
     working_dir: /app
-    hostname: backend
+    hostname: ${BACKEND_CONTAINER_NAME}
     volumes:
       - ../adoption_go:/app:cached
-      # ここにGoの依存関係のディレクトリがあれば、同様にキャッシュを考慮して追加
     tty: true
     ports:
-      - "8080:8080"
+      - "${BACKEND_HOST_PORT}:${BACKEND_CONTEINER_PORT}"
     environment: # AWS Secrets Managerに格納すること！
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_HOST: postgres
-      GO_ENV: dev
-      API_DOMAIN: backend
-      JWT_SECRET: L67HRe77jlmoAoaV1
-      JWT_SECRET2: L67HRe77jlmoAoaV2
-      JWT_SECRET3: L67HRe77jlmoAoaV3
-      BATCH_URL: http://batch:8081
-      FE_CSR_URL: http://localhost:3000
-      FE_SSG_URL: http://frontend:3000
-      FE_APPLICANT_CSR_URL: http://localhost:3001
-      FE_APPLICANT_SSG_URL: http://frontend_applicant:3000
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      AWS_REGION: ap-northeast-1
-      AWS_ACCESS_KEY: <REDACTED>
-      AWS_SECRET_KEY: <REDACTED>/
-      AWS_S3_BUCKET_NAME: adoption-resume
-      AUTH_CLIENT_ID: <REDACTED>
-      AUTH_CLIENT_SECRET: <REDACTED>
-      AUTH_REDIRECT_URI: http://localhost:3000/management/admin/auth/google
-      AUTH_SCOPE_URI: https://www.googleapis.com/auth/calendar
-    networks:
-      - network1
-
-  batch:
-    build:
-      context: ../adoption_batch
-      dockerfile: Dockerfile
-    container_name: batch
-    working_dir: /app
-    hostname: batch
-    volumes:
-      - ../adoption_batch:/app:cached
-    tty: true
-    ports:
-      - "8081:8081"
-    environment:
-      GO_ENV: dev
-      BATCH_DOMAIN: batch
-      API_URL: http://backend:8080
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_CONTEINER_PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      GO_ENV: ${GO_ENV}
+      API_DOMAIN: ${BACKEND_CONTAINER_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET2: ${JWT_SECRET2}
+      JWT_SECRET3: ${JWT_SECRET3}
+      FE_CSR_URL: ${PROTOCOL}://${HOST}:${FRONT_HOST_PORT}
+      FE_SSG_URL: ${PROTOCOL}://${FRONT_CONTAINER_NAME}:${FRONT_CONTEINER_PORT}
+      FE_APPLICANT_CSR_URL: ${PROTOCOL}://${HOST}:${FRONT2_HOST_PORT}
+      FE_APPLICANT_SSG_URL: ${PROTOCOL}://${FRONT_CONTAINER_NAME}:${FRONT2_CONTEINER_PORT}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: ${REDIS_CONTEINER_PORT}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+      AUTH_REDIRECT_URI: ${PROTOCOL}://${HOST}:${FRONT_HOST_PORT}/${AUTH_REDIRECT_URI_PATH}
+      AUTH_SCOPE_URI: ${AUTH_SCOPE_URI}
     networks:
       - network1
 
@@ -105,33 +84,25 @@ services:
     build:
       context: ./db
       dockerfile: Dockerfile
-    container_name: postgres
-    hostname: postgres
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    hostname: ${POSTGRES_CONTAINER_NAME}
     ports:
-      - 5434:5432
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTEINER_PORT}"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - network1
 
   redis:
     image: redis:7.2.1-alpine
-    container_name: redis
-    hostname: redis
+    container_name: ${REDIS_CONTAINER_NAME}
+    hostname: ${REDIS_CONTAINER_NAME}
     ports:
-      - 6380:6379
-    networks:
-      - network1
-
-  redisinsight:
-    image: redislabs/redisinsight
-    container_name: redisinsight
-    ports:
-      - 8001:8001
+      - "${REDIS_HOST_PORT}:${REDIS_CONTEINER_PORT}"
     networks:
       - network1
 
@@ -142,3 +113,4 @@ networks:
 volumes:
   next_node_modules:
   next2_node_modules:
+  postgres_data:
