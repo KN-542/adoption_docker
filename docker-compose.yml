@@ -1,0 +1,123 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: ../adoption_nextjs
+      dockerfile: Dockerfile
+    container_name: ${FRONT_CONTAINER_NAME}
+    working_dir: /app
+    hostname: ${FRONT_CONTAINER_NAME}
+    volumes:
+      - ../adoption_nextjs:/app:cached
+      - next_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
+    tty: true
+    ports:
+      - "${FRONT_HOST_PORT}:${FRONT_CONTEINER_PORT}"
+    environment:
+      NEXT_PUBLIC_CSR_URL: ${PROTOCOL}://${HOST}:${BACKEND_HOST_PORT}
+      NEXT_SSG_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
+      NEXT_SSR_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
+      NEXT_PUBLIC_COMPANY_NAME: ${COMPANY_NAME}
+      NEXT_PUBLIC_COMPANY_HREF: ${COMPANY_HREF}
+    networks:
+      - network1
+
+  frontend_applicant:
+    build:
+      context: ../applicant_nextjs
+      dockerfile: Dockerfile
+    container_name: ${FRONT2_CONTAINER_NAME}
+    working_dir: /app
+    hostname: ${FRONT2_CONTAINER_NAME}
+    volumes:
+      - ../applicant_nextjs:/app:cached
+      - next2_node_modules:/app/node_modules # node_modules をコンテナ内でキャッシュ
+    tty: true
+    ports:
+      - "${FRONT2_HOST_PORT}:${FRONT2_CONTEINER_PORT}"
+    environment:
+      NEXT_PUBLIC_CSR_URL: ${PROTOCOL}://${HOST}:${BACKEND_HOST_PORT}
+      NEXT_SSG_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
+      NEXT_SSR_URL: ${PROTOCOL}://${BACKEND_CONTAINER_NAME}:${BACKEND_CONTEINER_PORT}
+      NEXT_PUBLIC_COMPANY_NAME: ${COMPANY_NAME}
+      NEXT_PUBLIC_COMPANY_HREF: ${COMPANY_HREF}
+    networks:
+      - network1
+
+  backend:
+    build:
+      context: ../adoption_go
+      dockerfile: Dockerfile
+    container_name: ${BACKEND_CONTAINER_NAME}
+    depends_on:
+      - postgres # バックエンドのコンテナがpostgresに依存
+    working_dir: /app
+    hostname: ${BACKEND_CONTAINER_NAME}
+    volumes:
+      - ../adoption_go:/app:cached
+    tty: true
+    ports:
+      - "${BACKEND_HOST_PORT}:${BACKEND_CONTEINER_PORT}"
+    environment: # AWS Secrets Managerに格納すること！
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_CONTEINER_PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      GO_ENV: ${GO_ENV}
+      API_DOMAIN: ${BACKEND_CONTAINER_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET2: ${JWT_SECRET2}
+      JWT_SECRET3: ${JWT_SECRET3}
+      FE_CSR_URL: ${PROTOCOL}://${HOST}:${FRONT_HOST_PORT}
+      FE_SSG_URL: ${PROTOCOL}://${FRONT_CONTAINER_NAME}:${FRONT_CONTEINER_PORT}
+      FE_APPLICANT_CSR_URL: ${PROTOCOL}://${HOST}:${FRONT2_HOST_PORT}
+      FE_APPLICANT_SSG_URL: ${PROTOCOL}://${FRONT_CONTAINER_NAME}:${FRONT2_CONTEINER_PORT}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: ${REDIS_CONTEINER_PORT}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS: ${AWS_ACCESS_KEY}
+      AWS_SECRET: ${AWS_SECRET_KEY}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      AUTH_CLIENT: ${AUTH_CLIENT_ID}
+      AUTH_SECRET: ${AUTH_CLIENT_SECRET}
+      AUTH_REDIRECT_URI: ${PROTOCOL}://${HOST}:${FRONT_HOST_PORT}/${AUTH_REDIRECT_URI_PATH}
+      AUTH_SCOPE_URI: ${AUTH_SCOPE_URI}
+      INIT_USER_EMAIL: ${INIT_USER_EMAIL}
+    networks:
+      - network1
+
+  postgres:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    hostname: ${POSTGRES_CONTAINER_NAME}
+    ports:
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTEINER_PORT}"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network1
+
+  redis:
+    image: redis:7.2.1-alpine
+    container_name: ${REDIS_CONTAINER_NAME}
+    hostname: ${REDIS_CONTAINER_NAME}
+    ports:
+      - "${REDIS_HOST_PORT}:${REDIS_CONTEINER_PORT}"
+    networks:
+      - network1
+
+networks:
+  network1:
+    driver: bridge
+
+volumes:
+  next_node_modules:
+  next2_node_modules:
+  postgres_data:
